@@ -46,20 +46,23 @@ class JWTService:
             timedelta(days=self.refresh_token_expire_days)
         )
 
-    def decode_token(self, token: str) -> str:
+    def decode_token(self, token: str) -> dict:
         try:
             payload = jwt.decode(
                 token,
                 self.secret_key,
                 algorithms=[self.algorithm]
             )
+            
             username: str = payload.get("sub")
             if username is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=INVALID_TOKEN_SUB
                 )
-            return username
+            
+            return payload
+        
         except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
