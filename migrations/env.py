@@ -7,7 +7,7 @@ from alembic import context
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.database.database import Base, DATABASE_URL
-from app.models import client_model
+from app.models import client_model, product_model, product_image_model
 
 config = context.config
 fileConfig(config.config_file_name)
