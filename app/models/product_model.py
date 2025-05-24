@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Numeric, String, Date
 from sqlalchemy.orm import relationship
 from app.database.database import Base
+from app.models.product_image_model import ProductImageModel
 
 class ProductModel(Base):
     __tablename__ = "tb_products"
