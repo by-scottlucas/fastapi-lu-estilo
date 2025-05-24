@@ -1,17 +1,25 @@
 import os
+import shutil
 from fastapi import HTTPException
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
-from app.schemas.product_schema import ProductCreate
+from app.schemas.product_schema import ProductCreate, ProductUpdate
+from app.services.file_service import FileService
+from app.utils.db_exceptions import handle_db_exceptions
 
 
 class ProductService:
-    def __init__(self, product_model: ProductModel, product_image_model: ProductImageModel):
+    def __init__(
+        self,
+        product_model: ProductModel,
+        product_image_model: ProductImageModel
+    ):
         self.product_model = product_model
         self.product_image_model = product_image_model
 
+    @handle_db_exceptions
     def list_products(
         self,
         db: Session,
@@ -36,6 +44,7 @@ class ProductService:
 
         return query.offset(skip).limit(limit).all()
 
+    @handle_db_exceptions
     def _create_images(self, db: Session, product_id: int, image_paths: List[str]):
         for image_path in image_paths:
             image = self.product_image_model(
@@ -44,6 +53,7 @@ class ProductService:
             )
             db.add(image)
 
+    @handle_db_exceptions
     def create_product(
         self,
         db: Session,
@@ -63,6 +73,7 @@ class ProductService:
 
         return new_product
     
+    @handle_db_exceptions
     def get_product_by_id(self, db: Session, product_id: int) -> ProductModel:
         product = db.query(self.product_model).filter(self.product_model.id == product_id).first()
         if not product:
@@ -72,16 +83,64 @@ class ProductService:
             )
         return product
 
+    @handle_db_exceptions
+    def update_product(
+        self,
+        db: Session,
+        product_id: int,
+        product_data: ProductUpdate,
+        new_image_paths: Optional[List[str]] = None,
+        file_service: Optional[FileService] = None
+    ) -> ProductModel:
+        product = self.get_product_by_id(db, product_id)
 
+        old_product_name = product.name
+        old_category_name = product.category
+
+        for field, value in product_data.model_dump(exclude_unset=True).items():
+            if value is not None:
+                setattr(product, field, value)
+
+        new_product_name = product.name
+        new_category_name = product.category
+
+        old_folder = file_service._build_product_folder(old_category_name, old_product_name)
+        new_folder = file_service._build_product_folder(new_category_name, new_product_name)
+
+        if old_folder != new_folder:
+            if old_folder.exists():
+                shutil.rmtree(old_folder)
+            new_folder.mkdir(parents=True, exist_ok=True)
+
+        if new_image_paths is not None:
+            old_images = db.query(self.product_image_model).filter(
+                self.product_image_model.product_id == product.id
+            ).all()
+            old_image_paths = [img.image_path for img in old_images]
+
+            for img in old_images:
+                db.delete(img)
+            db.commit()
+
+            if file_service:
+                file_service.delete_files(old_image_paths)
+
+            self._create_images(db, product.id, new_image_paths)
+
+        db.commit()
+        db.refresh(product)
+        return product
+
+    @handle_db_exceptions
     def delete_product(self, db: Session, product_id: int):
-        product = self.get_product_by_id(product_id)
-
-        project_root = os.getcwd()
+        product = self.get_product_by_id(db, product_id)
 
         for image in product.images:
-            image_full_path = os.path.join(project_root, image.image_path)
-            if os.path.exists(image_full_path):
-                os.remove(image_full_path)
+            full_image_path = os.path.join(os.getcwd(), image.image_path)
+            folder_path = os.path.dirname(full_image_path)
+
+            if os.path.exists(folder_path):
+                shutil.rmtree(folder_path)
 
         db.delete(product)
         db.commit()

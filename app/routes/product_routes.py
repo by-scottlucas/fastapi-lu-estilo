@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
-from app.schemas.product_schema import ProductCreate, ProductResponse
+from app.schemas.product_schema import ProductCreate, ProductResponse, ProductUpdate
 from app.services.product_service import ProductService
 from app.services.file_service import FileService
 from app.database.database import get_db
@@ -70,6 +70,40 @@ def get_product_by_id(
 ):
     return service.get_product_by_id(db, product_id)
 
+@router.put("/{product_id}", response_model=ProductResponse)
+def update_product(
+    product_id: int,
+    name: str = Form(...),
+    sale_price: float = Form(...),
+    description: str = Form(...),
+    stock: int = Form(...),
+    bar_code: str = Form(...),
+    category: str = Form(...),
+    images: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    service: ProductService = Depends(get_product_service),
+    file_service: FileService = Depends(get_file_service)
+):
+    product_update = ProductUpdate(
+        name=name,
+        sale_price=sale_price,
+        description=description,
+        stock=stock,
+        bar_code=bar_code,
+        category=category,
+    )
+
+    new_image_paths = file_service.save_images(images, category, name)
+
+    updated_product = service.update_product(
+        db=db,
+        product_id=product_id,
+        product_data=product_update,
+        new_image_paths=new_image_paths,
+        file_service=file_service
+    )
+
+    return updated_product
 
 @router.delete("/{product_id}", status_code=204, summary="Delete product")
 def delete_product(
