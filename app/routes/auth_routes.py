@@ -16,7 +16,13 @@ def get_auth_service() -> AuthService:
     user_service = UserService(client_model=ClientModel)
     return AuthService(user_service=user_service, jwt_service=jwt_service)
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user",
+    description="Creates a new user account with the provided information and returns the user data."
+)
 def register(
     user_data: UserCreate,
     db: Session = Depends(get_db),
@@ -32,7 +38,12 @@ def register(
             detail="Internal server error"
         )
 
-@router.post("/login", response_model=TokenSchema)
+@router.post(
+    "/login",
+    response_model=TokenSchema,
+    summary="Authenticate user",
+    description="Authenticates the user using email and password, returning the access token."
+)
 def login(
     login_data: LoginSchema,
     db: Session = Depends(get_db),
@@ -48,7 +59,12 @@ def login(
             detail="Internal server error"
         )
 
-@router.post("/refresh", response_model=TokenSchema)
+@router.post(
+    "/refresh",
+    response_model=TokenSchema,
+    summary="Refresh access token",
+    description="Generates a new access token using a valid refresh token."
+)
 def refresh_token(
     data: RefreshToken,
     auth_service: AuthService = Depends(get_auth_service)
