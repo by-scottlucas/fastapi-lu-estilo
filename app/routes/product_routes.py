@@ -61,3 +61,20 @@ def create_product(
     )
 
     return service.create_product(db, product_data, image_paths)
+
+@router.get("/{product_id}", response_model=ProductResponse, summary="Get product by ID")
+def get_product_by_id(
+    product_id: int,
+    db: Session = Depends(get_db),
+    service: ProductService = Depends(get_product_service)
+):
+    return service.get_product_by_id(db, product_id)
+
+
+@router.delete("/{product_id}", status_code=204, summary="Delete product")
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    service: ProductService = Depends(get_product_service)
+):
+    service.delete_product(db, product_id)

@@ -40,3 +40,12 @@ class FileService:
             shutil.copyfileobj(image.file, buffer)
 
         return str(file_path)
+
+    def delete_files(self, file_paths: List[str]) -> None:
+        for file_path in file_paths:
+            try:
+                path = Path(file_path)
+                if path.exists() and path.is_file():
+                    path.unlink()
+            except Exception as error:
+                print(f"Error deleting file {file_path}: {error}")

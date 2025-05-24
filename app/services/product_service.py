@@ -1,3 +1,5 @@
+import os
+from fastapi import HTTPException
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.product_image_model import ProductImageModel
@@ -48,7 +50,10 @@ class ProductService:
         product_data: ProductCreate,
         image_paths: List[str]
     ) -> ProductModel:
-        new_product = self.product_model(**product_data.model_dump())
+        product_dict = product_data.model_dump()
+        product_dict.pop("images", None)
+
+        new_product = self.product_model(**product_dict)
         db.add(new_product)
         db.commit()
         db.refresh(new_product)
@@ -58,3 +63,25 @@ class ProductService:
 
         return new_product
     
+    def get_product_by_id(self, db: Session, product_id: int) -> ProductModel:
+        product = db.query(self.product_model).filter(self.product_model.id == product_id).first()
+        if not product:
+            raise HTTPException(
+                status_code=404,
+                detail="Product not found."
+            )
+        return product
+
+
+    def delete_product(self, db: Session, product_id: int):
+        product = self.get_product_by_id(product_id)
+
+        project_root = os.getcwd()
+
+        for image in product.images:
+            image_full_path = os.path.join(project_root, image.image_path)
+            if os.path.exists(image_full_path):
+                os.remove(image_full_path)
+
+        db.delete(product)
+        db.commit()
