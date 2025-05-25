@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
+from app.enums.role_enum import RoleEnum
+
 class UserBase(BaseModel):
     name: Optional[str] = Field(
         None,
@@ -25,6 +27,12 @@ class UserBase(BaseModel):
         title="Password",
         description="User's password",
         example="strongpassword123"
+    )
+    role: Optional[RoleEnum] = Field(
+        RoleEnum.USER,
+        title="Role",
+        description="User role (user or admin)",
+        example="user"
     )
 
 class UserCreate(UserBase):
@@ -52,6 +60,13 @@ class UserCreate(UserBase):
         description="User's password",
         example="strongpassword123"
     )
+    role: Optional[RoleEnum] = Field(
+        RoleEnum.USER,
+        title="Role",
+        description="User role (user or admin)",
+        example="user"
+    )
+
 
 class UserUpdate(UserBase):
     password: Optional[str] = Field(
@@ -68,6 +83,12 @@ class UserResponse(UserBase):
         description="Unique identifier for the user",
         example=1
     )
+    role: Optional[RoleEnum] = Field(
+        RoleEnum.USER,
+        title="Role",
+        description="User role (user or admin)",
+        example="user"
+    )
 
     class Config:
         orm_mode = True
@@ -77,6 +98,7 @@ class UserResponse(UserBase):
                 "name": "John Doe",
                 "cpf": "123.456.789-00",
                 "email": "john@example.com",
-                "password": "strongpassword123"
+                "password": "strongpassword123",
+                "role": "user"
             }
         }
