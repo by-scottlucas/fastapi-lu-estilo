@@ -27,6 +27,7 @@ class ProductService:
         limit: int = 10,
         stock: Optional[bool] = None,
         category: Optional[str] = None,
+        min_price: Optional[float] = None,
         max_price: Optional[float] = None
     ) -> List[ProductModel]:
         query = db.query(self.product_model)
@@ -34,8 +35,13 @@ class ProductService:
 
         if stock is not None:
             filters.append(self.product_model.stock > 0 if stock else self.product_model.stock == 0)
+
         if category:
             filters.append(self.product_model.category.ilike(f"%{category}%"))
+
+        if min_price is not None:
+            filters.append(self.product_model.sale_price >= min_price)
+
         if max_price is not None:
             filters.append(self.product_model.sale_price <= max_price)
 

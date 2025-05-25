@@ -17,12 +17,30 @@ def get_product_service() -> ProductService:
 def get_file_service() -> FileService:
     return FileService()
 
-@router.get("/", response_model=List[ProductResponse], summary="List products")
+@router.get(
+    "/",
+    response_model=List[ProductResponse],
+    summary="List products",
+    description=(
+        "Retrieve a list of products with optional filters:\n\n"
+        "- **skip**: number of records to skip (for pagination).\n"
+        "- **limit**: maximum number of records to return (default 10, max 100).\n"
+        "- **stock**: filter by stock availability. Use `true` to get only products in stock, "
+        "`false` for products out of stock, or omit to ignore this filter.\n"
+        "- **category**: filter products by exact category name (case-sensitive).\n"
+        "- **min_price**: filter products with sale price greater than or equal to this value.\n"
+        "- **max_price**: filter products with sale price less than or equal to this value.\n\n"
+        "**Example queries:**\n\n"
+        "- `/api/v1/products?stock=true&category=Electronics&min_price=500&max_price=1000`\n\n"
+        "- `/api/v1/products?skip=20&limit=10`"
+    )
+)
 def list_products(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, le=100),
     stock: Optional[bool] = None,
     category: Optional[str] = None,
+    min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_product_service)
@@ -33,10 +51,16 @@ def list_products(
         limit=limit,
         stock=stock,
         category=category,
+        min_price=min_price,
         max_price=max_price
     )
 
-@router.post("/", response_model=ProductResponse, summary="Create product with images")
+@router.post(
+    "/",
+    response_model=ProductResponse,
+    summary="Create product with images",
+    description="Create a new product with the given details and upload multiple images."
+)
 def create_product(
     name: str = Form(...),
     sale_price: float = Form(...),
@@ -47,7 +71,7 @@ def create_product(
     images: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_product_service),
-    file_service: FileService = Depends(FileService)
+    file_service: FileService = Depends(get_file_service)
 ):
     image_paths = file_service.save_images(images, category, name)
 
@@ -62,7 +86,12 @@ def create_product(
 
     return service.create_product(db, product_data, image_paths)
 
-@router.get("/{product_id}", response_model=ProductResponse, summary="Get product by ID")
+@router.get(
+    "/{product_id}",
+    response_model=ProductResponse,
+    summary="Get product by ID",
+    description="Retrieve a product by its unique identifier."
+)
 def get_product_by_id(
     product_id: int,
     db: Session = Depends(get_db),
@@ -70,7 +99,12 @@ def get_product_by_id(
 ):
     return service.get_product_by_id(db, product_id)
 
-@router.put("/{product_id}", response_model=ProductResponse)
+@router.put(
+    "/{product_id}",
+    response_model=ProductResponse,
+    summary="Update product",
+    description="Update an existing product's details and images by its ID."
+)
 def update_product(
     product_id: int,
     name: str = Form(...),
@@ -105,7 +139,12 @@ def update_product(
 
     return updated_product
 
-@router.delete("/{product_id}", status_code=204, summary="Delete product")
+@router.delete(
+    "/{product_id}",
+    status_code=204,
+    summary="Delete product",
+    description="Delete a product by its ID."
+)
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
