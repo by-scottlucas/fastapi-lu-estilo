@@ -1,5 +1,6 @@
 import datetime
 from typing import List, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session, joinedload
 from decimal import Decimal
 
@@ -102,3 +103,13 @@ class OrderService:
         db.refresh(new_order)
 
         return new_order
+    
+
+    def get_order_by_id(self, db: Session, order_id: int) -> OrderModel:
+        order = db.query(self.order_model).filter(self.order_model.id == order_id).first()
+        if not order:
+            raise HTTPException(
+                status_code=404,
+                detail="Order not found."
+            )
+        return order

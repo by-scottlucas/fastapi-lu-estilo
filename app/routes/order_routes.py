@@ -96,3 +96,22 @@ def create_order(
     current_user: ClientModel = Depends(get_current_user),
 ):
     return service.create_order(db, order)
+
+
+@router.get(
+    "/{order_id}",
+    response_model=OrderResponse,
+    summary="Get order by ID",
+    description="Retrieve a order by its unique identifier.",
+    responses={
+        **order_not_found_response,
+        **internal_server_error_response
+    }
+)
+def get_order_by_id(
+    order_id: int,
+    db: Session = Depends(get_db),
+    service: OrderService = Depends(get_order_service),
+    current_user: ClientModel = Depends(get_current_user),
+):
+    return service.get_order_by_id(db, order_id)
