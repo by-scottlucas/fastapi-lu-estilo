@@ -75,7 +75,8 @@ class UserService:
             name=user_data.name,
             cpf=user_data.cpf,
             email=user_data.email,
-            password=hashed_password
+            password=hashed_password,
+            role=user_data.role
         )
 
         db.add(new_user)

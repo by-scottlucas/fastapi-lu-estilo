@@ -169,3 +169,30 @@ class ProductService:
 
         db.delete(product)
         db.commit()
+
+    @handle_db_exceptions
+    def validate_and_decrease_stock(
+        self,
+        db: Session,
+        product_id: int,
+        quantity: int
+    ) -> ProductModel:
+        product = db.query(self.product_model)\
+                    .filter(self.product_model.id == product_id)\
+                    .with_for_update().first()
+
+        if not product:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Product not found."
+            )
+
+        if product.stock < quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Insufficient stock. Available: {product.stock}"
+            )
+
+        product.stock -= quantity
+        db.add(product)
+        return product
