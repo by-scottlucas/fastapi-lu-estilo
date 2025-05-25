@@ -1,7 +1,12 @@
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
+from app.docs.product_responses import (
+    product_not_found_response,
+    product_conflict_response,
+    internal_server_error_response
+)
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from app.schemas.product_schema import ProductCreate, ProductResponse, ProductUpdate
@@ -33,7 +38,8 @@ def get_file_service() -> FileService:
         "**Example queries:**\n\n"
         "- `/api/v1/products?stock=true&category=Electronics&min_price=500&max_price=1000`\n\n"
         "- `/api/v1/products?skip=20&limit=10`"
-    )
+    ),
+    responses={**internal_server_error_response}
 )
 def list_products(
     skip: int = Query(0, ge=0),
@@ -58,8 +64,13 @@ def list_products(
 @router.post(
     "/",
     response_model=ProductResponse,
+    status_code=status.HTTP_201_CREATED,
     summary="Create product with images",
-    description="Create a new product with the given details and upload multiple images."
+    description="Create a new product with the given details and upload multiple images.",
+    responses={
+        **product_conflict_response,
+        **internal_server_error_response
+    }
 )
 def create_product(
     name: str = Form(...),
@@ -90,7 +101,11 @@ def create_product(
     "/{product_id}",
     response_model=ProductResponse,
     summary="Get product by ID",
-    description="Retrieve a product by its unique identifier."
+    description="Retrieve a product by its unique identifier.",
+    responses={
+        **product_not_found_response,
+        **internal_server_error_response
+    }
 )
 def get_product_by_id(
     product_id: int,
@@ -103,7 +118,12 @@ def get_product_by_id(
     "/{product_id}",
     response_model=ProductResponse,
     summary="Update product",
-    description="Update an existing product's details and images by its ID."
+    description="Update an existing product's details and images by its ID.",
+    responses={
+        **product_not_found_response,
+        **product_conflict_response,
+        **internal_server_error_response
+    }
 )
 def update_product(
     product_id: int,
@@ -141,9 +161,13 @@ def update_product(
 
 @router.delete(
     "/{product_id}",
-    status_code=204,
+    status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete product",
-    description="Delete a product by its ID."
+    description="Delete a product by its ID.",
+    responses={
+        **product_not_found_response,
+        **internal_server_error_response
+    }
 )
 def delete_product(
     product_id: int,
