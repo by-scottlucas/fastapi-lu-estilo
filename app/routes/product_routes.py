@@ -14,6 +14,9 @@ from app.services.product_service import ProductService
 from app.services.file_service import FileService
 from app.database.database import get_db
 
+from app.dependencies import get_current_user, admin_required
+from app.models.client_model import ClientModel
+
 router = APIRouter(prefix="/api/v1/products", tags=["products"])
 
 def get_product_service() -> ProductService:
@@ -49,7 +52,8 @@ def list_products(
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     db: Session = Depends(get_db),
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: ClientModel = Depends(get_current_user),
 ):
     return service.list_products(
         db,
@@ -82,7 +86,8 @@ def create_product(
     images: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_product_service),
-    file_service: FileService = Depends(get_file_service)
+    file_service: FileService = Depends(get_file_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     image_paths = file_service.save_images(images, category, name)
 
@@ -110,7 +115,8 @@ def create_product(
 def get_product_by_id(
     product_id: int,
     db: Session = Depends(get_db),
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: ClientModel = Depends(get_current_user),
 ):
     return service.get_product_by_id(db, product_id)
 
@@ -136,7 +142,8 @@ def update_product(
     images: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_product_service),
-    file_service: FileService = Depends(get_file_service)
+    file_service: FileService = Depends(get_file_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     product_update = ProductUpdate(
         name=name,
@@ -172,6 +179,7 @@ def update_product(
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
-    service: ProductService = Depends(get_product_service)
+    service: ProductService = Depends(get_product_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     service.delete_product(db, product_id)

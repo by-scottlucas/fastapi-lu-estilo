@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, status
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
+from app.dependencies import admin_required, get_current_user
 from app.docs.user_responses import (
     user_not_found_response,
     user_conflict_response,
@@ -39,7 +40,8 @@ def list_users(
     name: Optional[str] = Query(None, description="Filter by user name"),
     email: Optional[str] = Query(None, description="Filter by user email"),
     db: Session = Depends(get_db),
-    service: UserService = Depends(get_user_service)
+    service: UserService = Depends(get_user_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     return service.list_users(db, skip=skip, limit=limit, name=name, email=email)
 
@@ -57,7 +59,8 @@ def list_users(
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db),
-    service: UserService = Depends(get_user_service)
+    service: UserService = Depends(get_user_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     return service.create_user(db, user_data)
 
@@ -74,7 +77,8 @@ def create_user(
 def get_user_by_id(
     user_id: int,
     db: Session = Depends(get_db),
-    service: UserService = Depends(get_user_service)
+    service: UserService = Depends(get_user_service),
+    current_user: ClientModel = Depends(get_current_user),
 ):
     return service.get_user_by_id(db, user_id)
 
@@ -93,9 +97,10 @@ def update_user(
     user_id: int,
     user_data: UserUpdate,
     db: Session = Depends(get_db),
+    current_user: ClientModel = Depends(get_current_user),
     service: UserService = Depends(get_user_service)
 ):
-    return service.update_user(db, user_id, user_data)
+    return service.update_user(db, user_id, user_data, current_user)
 
 @router.delete(
     "/{user_id}",
@@ -110,6 +115,7 @@ def update_user(
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    service: UserService = Depends(get_user_service)
+    service: UserService = Depends(get_user_service),
+    current_user: ClientModel = Depends(admin_required),
 ):
     service.delete_user(db, user_id)

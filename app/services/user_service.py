@@ -84,7 +84,19 @@ class UserService:
         return new_user
 
     @handle_db_exceptions
-    def update_user(self, db: Session, user_id: int, user_data: UserUpdate) -> ClientModel:
+    def update_user(
+        self,
+        db: Session,
+        user_id: int,
+        user_data: UserUpdate,
+        current_user: ClientModel
+    ) -> ClientModel:
+        if current_user.id != user_id and current_user.role != "ADMIN":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied. You can only update your own data unless you are an administrator."
+            )
+
         user = self.get_user_by_id(db, user_id)
         update_fields = user_data.model_dump(exclude_unset=True)
 
