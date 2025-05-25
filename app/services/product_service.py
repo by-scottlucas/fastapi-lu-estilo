@@ -49,6 +49,17 @@ class ProductService:
             query = query.filter(*filters)
 
         return query.offset(skip).limit(limit).all()
+    
+    def _check_bar_code_unique(self, db: Session, bar_code: str, product_id: Optional[int] = None):
+        query = db.query(self.product_model).filter(self.product_model.bar_code == bar_code)
+        if product_id:
+            query = query.filter(self.product_model.id != product_id)
+        existing = query.first()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Bar code already registered."
+            )
 
     @handle_db_exceptions
     def _create_images(self, db: Session, product_id: int, image_paths: List[str]):
@@ -66,6 +77,8 @@ class ProductService:
         product_data: ProductCreate,
         image_paths: List[str]
     ) -> ProductModel:
+        self._check_bar_code_unique(db, product_data.bar_code)
+
         product_dict = product_data.model_dump()
         product_dict.pop("images", None)
 
@@ -100,20 +113,26 @@ class ProductService:
     ) -> ProductModel:
         product = self.get_product_by_id(db, product_id)
 
+        updated_data = product_data.model_dump(exclude_unset=True)
+        new_bar_code = updated_data.get("bar_code")
+
+        if new_bar_code and new_bar_code != product.bar_code:
+            self._check_bar_code_unique(db, new_bar_code, product_id=product_id)
+
         old_product_name = product.name
         old_category_name = product.category
 
-        for field, value in product_data.model_dump(exclude_unset=True).items():
+        for field, value in updated_data.items():
             if value is not None:
                 setattr(product, field, value)
 
         new_product_name = product.name
         new_category_name = product.category
 
-        old_folder = file_service._build_product_folder(old_category_name, old_product_name)
-        new_folder = file_service._build_product_folder(new_category_name, new_product_name)
+        old_folder = file_service._build_product_folder(old_category_name, old_product_name) if file_service else None
+        new_folder = file_service._build_product_folder(new_category_name, new_product_name) if file_service else None
 
-        if old_folder != new_folder:
+        if old_folder and new_folder and old_folder != new_folder:
             if old_folder.exists():
                 shutil.rmtree(old_folder)
             new_folder.mkdir(parents=True, exist_ok=True)
