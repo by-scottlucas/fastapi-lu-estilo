@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
+
 from app.models.client_model import ClientModel
 from app.schemas.auth_schema import LoginSchema
 from app.schemas.user_schema import UserCreate, UserResponse
@@ -8,6 +9,8 @@ from app.services.auth_service import AuthService
 from app.services.jwt_service import JWTService
 from app.services.user_service import UserService
 from app.database.database import get_db
+
+from app.docs.auth_responses import unauthorized_responses, internal_server_error_response, conflict_response
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -21,7 +24,11 @@ def get_auth_service() -> AuthService:
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    description="Creates a new user account with the provided information and returns the user data."
+    description="Creates a new user account with the provided information and returns the user data.",
+    responses={
+        **conflict_response,
+        **internal_server_error_response,
+    }
 )
 def register(
     user_data: UserCreate,
@@ -38,11 +45,16 @@ def register(
             detail="Internal server error"
         )
 
+
 @router.post(
     "/login",
     response_model=TokenSchema,
     summary="Authenticate user",
-    description="Authenticates the user using email and password, returning the access token."
+    description="Authenticates the user using email and password, returning the access token.",
+    responses={
+        **unauthorized_responses,
+        **internal_server_error_response,
+    }
 )
 def login(
     login_data: LoginSchema,
@@ -59,11 +71,16 @@ def login(
             detail="Internal server error"
         )
 
+
 @router.post(
     "/refresh",
     response_model=TokenSchema,
     summary="Refresh access token",
-    description="Generates a new access token using a valid refresh token."
+    description="Generates a new access token using a valid refresh token.",
+    responses={
+        **unauthorized_responses,
+        **internal_server_error_response,
+    }
 )
 def refresh_token(
     data: RefreshToken,
