@@ -25,7 +25,7 @@ class OrderItemBase(BaseModel):
         None,
         title="Price at Moment",
         description="Price of the product at the time of the order",
-        example=7500.00
+        example=150.00
     )
 
 class OrderItemCreate(OrderItemBase):
@@ -45,7 +45,7 @@ class OrderItemCreate(OrderItemBase):
         None,
         title="Price at Moment",
         description="Price of the product at the time of the order",
-        example=7500.00
+        example=150.00
     )
 
 class OrderItemResponse(OrderItemBase):
@@ -69,7 +69,7 @@ class OrderBase(BaseModel):
         None,
         title="Client ID",
         description="Unique identifier of the client who made the order",
-        example=1
+        example=23
     )
     status: Optional[OrderStatusEnum] = Field(
         None,
@@ -93,7 +93,7 @@ class OrderBase(BaseModel):
         None,
         title="Total Amount",
         description="Total amount for the order",
-        example=15000.00
+        example=350.00
     )
     created_at: Optional[datetime] = Field(
         None,
@@ -103,7 +103,7 @@ class OrderBase(BaseModel):
     )
     order_items: Optional[List[OrderItemResponse]] = Field(
         None,
-        title="Products",
+        title="Order Items",
         description="List of products/items in the order"
     )
 
@@ -112,7 +112,7 @@ class OrderCreate(OrderBase):
         ...,
         title="Client ID",
         description="Unique identifier of the client who made the order",
-        example=1
+        example=23
     )
     status: OrderStatusEnum = Field(
         ...,
@@ -136,11 +136,11 @@ class OrderCreate(OrderBase):
         None,
         title="Total Amount",
         description="Total amount for the order",
-        example=15000.00
+        example=350.00
     )
     order_items: List[OrderItemCreate] = Field(
         ...,
-        title="Products",
+        title="Order Items",
         description="List of products/items in the order"
     )
 
@@ -163,11 +163,11 @@ class OrderResponse(OrderBase):
         ...,
         title="Order ID",
         description="Unique identifier of the order",
-        example=1
+        example=101
     )
     order_items: List[OrderItemResponse] = Field(
         ...,
-        title="Products",
+        title="Order Items",
         description="List of products/items in the order"
     )
 
@@ -175,33 +175,50 @@ class OrderResponse(OrderBase):
         orm_mode = True
         schema_extra = {
             "example": {
-                "id": 1,
-                "client_id": 1,
+                "id": 101,
+                "client_id": 23,
                 "status": "PENDING",
                 "payment_method": "BANK_SLIP",
                 "payment_status": "PENDING",
-                "total_amount": 15000.00,
+                "total_amount": 350.00,
                 "created_at": "2025-05-25T15:30:00Z",
                 "order_items": [
                     {
-                        "id": 1,
-                        "name": "Apple iPhone 14",
-                        "sale_price": 999.99,
-                        "description": "Latest model with A15 chip",
-                        "stock": 10,
-                        "bar_code": "1234567890123",
-                        "category": "Smartphones",
-                        "expiration_date": "2025-12-31",
-                        "images": [
-                            {
-                                "id": 1,
-                                "image_path": "/images/product1.jpg"
-                            },
-                            {
-                                "id": 2,
-                                "image_path": "/images/product2.jpg"
-                            }
-                        ]
+                        "id": 501,
+                        "quantity": 2,
+                        "price_at_moment": 50.00,
+                        "product": {
+                            "id": 1,
+                            "name": "Basic Cotton T-Shirt",
+                            "sale_price": 50.00,
+                            "description": "Basic 100% cotton t-shirt available in various colors",
+                            "stock": 120,
+                            "bar_code": "7891234567890",
+                            "category": "T-Shirts",
+                            "expiration_date": None,
+                            "images": [
+                                {"id": 1, "image_path": "/images/products/basic_cotton_tshirt_1.jpg"},
+                                {"id": 2, "image_path": "/images/products/basic_cotton_tshirt_2.jpg"}
+                            ]
+                        }
+                    },
+                    {
+                        "id": 502,
+                        "quantity": 1,
+                        "price_at_moment": 150.00,
+                        "product": {
+                            "id": 2,
+                            "name": "Skinny Jeans",
+                            "sale_price": 150.00,
+                            "description": "Dark wash skinny jeans with stretch fabric",
+                            "stock": 75,
+                            "bar_code": "7890987654321",
+                            "category": "Jeans",
+                            "expiration_date": None,
+                            "images": [
+                                {"id": 3, "image_path": "/images/products/skinny_jeans_1.jpg"}
+                            ]
+                        }
                     }
                 ]
             }

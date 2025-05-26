@@ -54,28 +54,28 @@ order_list_responses = {
                                 "id": 1,
                                 "client_id": 1,
                                 "status": "pending",
-                                "payment_method": "bank_slip",
+                                "payment_method": "credit_card",
                                 "payment_status": "pending",
-                                "total_amount": 15000,
+                                "total_amount": 12000,
                                 "created_at": "2025-05-25T15:30:00Z",
                                 "order_items": [
                                     {
                                         "id": 1,
-                                        "product_id": 18,
-                                        "quantity": 2,
-                                        "price_at_moment": 7500,
+                                        "product_id": 101,
+                                        "quantity": 3,
+                                        "price_at_moment": 4000,
                                         "product": {
-                                            "id": 1,
-                                            "name": "Apple iPhone 14",
-                                            "sale_price": 999.99,
-                                            "description": "Latest model with A15 chip",
-                                            "stock": 10,
-                                            "bar_code": "1234567890123",
-                                            "category": "Smartphones",
-                                            "expiration_date": "2025-12-31",
+                                            "id": 101,
+                                            "name": "Men's Cotton T-Shirt",
+                                            "sale_price": 39.99,
+                                            "description": "Soft and breathable cotton t-shirt, available in multiple colors.",
+                                            "stock": 50,
+                                            "bar_code": "8801234567890",
+                                            "category": "Apparel",
+                                            "expiration_date": None,
                                             "images": [
-                                                {"id": 1, "image_path": "/images/product1.jpg"},
-                                                {"id": 2, "image_path": "/images/product2.jpg"}
+                                                {"id": 1, "image_path": "/images/products/tshirt1.jpg"},
+                                                {"id": 2, "image_path": "/images/products/tshirt2.jpg"}
                                             ]
                                         }
                                     }
@@ -88,31 +88,31 @@ order_list_responses = {
                         "description": "Returns only completed orders.",
                         "value": [
                             {
-                                "id": 1,
-                                "client_id": 1,
+                                "id": 2,
+                                "client_id": 2,
                                 "status": "completed",
-                                "payment_method": "bank_slip",
+                                "payment_method": "credit_card",
                                 "payment_status": "paid",
-                                "total_amount": 15000,
-                                "created_at": "2025-05-25T15:30:00Z",
+                                "total_amount": 8000,
+                                "created_at": "2025-05-20T10:00:00Z",
                                 "order_items": [
                                     {
-                                        "id": 1,
-                                        "product_id": 18,
+                                        "id": 3,
+                                        "product_id": 102,
                                         "quantity": 2,
-                                        "price_at_moment": 7500,
+                                        "price_at_moment": 4000,
                                         "product": {
-                                            "id": 1,
-                                            "name": "Apple iPhone 14",
-                                            "sale_price": 999.99,
-                                            "description": "Latest model with A15 chip",
-                                            "stock": 10,
-                                            "bar_code": "1234567890123",
-                                            "category": "Smartphones",
-                                            "expiration_date": "2025-12-31",
+                                            "id": 102,
+                                            "name": "Women's Denim Jacket",
+                                            "sale_price": 79.99,
+                                            "description": "Stylish denim jacket with button closure and side pockets.",
+                                            "stock": 25,
+                                            "bar_code": "8801234567891",
+                                            "category": "Apparel",
+                                            "expiration_date": None,
                                             "images": [
-                                                {"id": 1, "image_path": "/images/product1.jpg"},
-                                                {"id": 2, "image_path": "/images/product2.jpg"}
+                                                {"id": 3, "image_path": "/images/products/jacket1.jpg"},
+                                                {"id": 4, "image_path": "/images/products/jacket2.jpg"}
                                             ]
                                         }
                                     }
@@ -128,28 +128,28 @@ order_list_responses = {
                                 "id": 1,
                                 "client_id": 1,
                                 "status": "pending",
-                                "payment_method": "bank_slip",
+                                "payment_method": "credit_card",
                                 "payment_status": "pending",
-                                "total_amount": 15000,
+                                "total_amount": 12000,
                                 "created_at": "2025-05-25T15:30:00Z",
                                 "order_items": [
                                     {
                                         "id": 1,
-                                        "product_id": 18,
-                                        "quantity": 2,
-                                        "price_at_moment": 7500,
+                                        "product_id": 101,
+                                        "quantity": 3,
+                                        "price_at_moment": 4000,
                                         "product": {
-                                            "id": 1,
-                                            "name": "Apple iPhone 14",
-                                            "sale_price": 999.99,
-                                            "description": "Latest model with A15 chip",
-                                            "stock": 10,
-                                            "bar_code": "1234567890123",
-                                            "category": "Smartphones",
-                                            "expiration_date": "2025-12-31",
+                                            "id": 101,
+                                            "name": "Men's Cotton T-Shirt",
+                                            "sale_price": 39.99,
+                                            "description": "Soft and breathable cotton t-shirt, available in multiple colors.",
+                                            "stock": 50,
+                                            "bar_code": "8801234567890",
+                                            "category": "Apparel",
+                                            "expiration_date": None,
                                             "images": [
-                                                {"id": 1, "image_path": "/images/product1.jpg"},
-                                                {"id": 2, "image_path": "/images/product2.jpg"}
+                                                {"id": 1, "image_path": "/images/products/tshirt1.jpg"},
+                                                {"id": 2, "image_path": "/images/products/tshirt2.jpg"}
                                             ]
                                         }
                                     }
@@ -158,35 +158,35 @@ order_list_responses = {
                         ]
                     },
                     "FilterByDateRange": {
-                        "summary": "GET /orders?start_date=2025-05-25&end_date=2025-05-26",
+                        "summary": "GET /orders?start_date=2025-05-20&end_date=2025-05-26",
                         "description": "Returns orders created within the given date range.",
                         "value": [
                             {
-                                "id": 1,
-                                "client_id": 1,
+                                "id": 3,
+                                "client_id": 3,
                                 "status": "pending",
-                                "payment_method": "bank_slip",
+                                "payment_method": "paypal",
                                 "payment_status": "pending",
-                                "total_amount": 15000,
-                                "created_at": "2025-05-25T15:30:00Z",
+                                "total_amount": 6000,
+                                "created_at": "2025-05-22T12:00:00Z",
                                 "order_items": [
                                     {
-                                        "id": 1,
-                                        "product_id": 18,
-                                        "quantity": 2,
-                                        "price_at_moment": 7500,
+                                        "id": 5,
+                                        "product_id": 103,
+                                        "quantity": 1,
+                                        "price_at_moment": 6000,
                                         "product": {
-                                            "id": 1,
-                                            "name": "Apple iPhone 14",
-                                            "sale_price": 999.99,
-                                            "description": "Latest model with A15 chip",
-                                            "stock": 10,
-                                            "bar_code": "1234567890123",
-                                            "category": "Smartphones",
-                                            "expiration_date": "2025-12-31",
+                                            "id": 103,
+                                            "name": "Silk Scarf",
+                                            "sale_price": 59.99,
+                                            "description": "Elegant silk scarf with floral pattern, perfect for all seasons.",
+                                            "stock": 15,
+                                            "bar_code": "8801234567892",
+                                            "category": "Accessories",
+                                            "expiration_date": None,
                                             "images": [
-                                                {"id": 1, "image_path": "/images/product1.jpg"},
-                                                {"id": 2, "image_path": "/images/product2.jpg"}
+                                                {"id": 5, "image_path": "/images/products/scarf1.jpg"},
+                                                {"id": 6, "image_path": "/images/products/scarf2.jpg"}
                                             ]
                                         }
                                     }

@@ -2,11 +2,6 @@ from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from app.docs.product_responses import (
-    product_not_found_response,
-    product_conflict_response,
-    internal_server_error_response
-)
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from app.schemas.product_schema import ProductCreate, ProductResponse, ProductUpdate
@@ -16,6 +11,12 @@ from app.database.database import get_db
 
 from app.dependencies import get_current_user, admin_required
 from app.models.client_model import ClientModel
+from app.docs.product_responses import (
+    product_not_found_response,
+    product_conflict_response,
+    internal_server_error_response,
+    product_list_responses
+)
 
 router = APIRouter(prefix="/api/v1/products", tags=["products"])
 
@@ -42,7 +43,10 @@ def get_file_service() -> FileService:
         "- `/api/v1/products?stock=true&category=Electronics&min_price=500&max_price=1000`\n\n"
         "- `/api/v1/products?skip=20&limit=10`"
     ),
-    responses={**internal_server_error_response}
+    responses={
+        **product_list_responses,
+        **internal_server_error_response
+    }
 )
 def list_products(
     skip: int = Query(0, ge=0),

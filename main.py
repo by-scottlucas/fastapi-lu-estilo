@@ -2,7 +2,15 @@ from fastapi import FastAPI
 from app.routes import auth_routes, order_routes, product_routes, user_routes
 from app.database.database import Base, engine
 
-app = FastAPI()
+app = FastAPI(
+    title="FastAPI - Lu Estilo",
+    description="""
+    API providing functionalities for user authentication, product management,
+    order processing, and user administration. Designed to streamline
+    sales operations and improve management efficiency.
+    """,
+    version="1.0.0"
+)
 
 Base.metadata.create_all(bind=engine)
 
