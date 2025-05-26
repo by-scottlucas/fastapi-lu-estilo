@@ -3,6 +3,7 @@ import shutil
 from fastapi import HTTPException
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from app.models.order_model import OrderModel
 from app.models.product_image_model import ProductImageModel
 from app.models.product_model import ProductModel
 from app.schemas.product_schema import ProductCreate, ProductUpdate
@@ -196,3 +197,13 @@ class ProductService:
         product.stock -= quantity
         db.add(product)
         return product
+    
+    @handle_db_exceptions
+    def restore_product_stock(self, db: Session, order: OrderModel):
+        for item in order.order_items:
+            product = db.query(self.product_model)\
+                        .filter(self.product_model.id == item.product_id).first()
+            
+            if product:
+                product.stock += item.quantity
+                db.add(product)

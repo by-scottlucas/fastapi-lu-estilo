@@ -9,7 +9,7 @@ from app.models.client_model import ClientModel
 from app.models.order_item_model import OrderItemModel
 from app.models.order_model import OrderModel
 from app.models.product_model import ProductModel
-from app.schemas.order_schema import OrderCreate, OrderResponse
+from app.schemas.order_schema import OrderCreate, OrderResponse, OrderUpdate
 from app.services.order_service import OrderService
 from app.services.product_service import ProductService
 from app.enums.order_status_enum import OrderStatusEnum
@@ -115,3 +115,48 @@ def get_order_by_id(
     current_user: ClientModel = Depends(get_current_user),
 ):
     return service.get_order_by_id(db, order_id)
+
+@router.put(
+    "/{order_id}",
+    response_model=OrderResponse,
+    summary="Update order infos",
+    description=(
+        "Update the details of an existing order identified by its ID. "
+        "Allows changes to order status and items. Returns the updated order."
+    ),
+    responses={
+        **order_not_found_response,
+        **order_conflict_response,
+        **internal_server_error_response,
+    }
+)
+def update_order(
+    order_id: int,
+    order_data: OrderUpdate,
+    db: Session = Depends(get_db),
+    service: OrderService = Depends(get_order_service),
+    current_user: ClientModel = Depends(get_current_user),
+):
+    return service.update_order(db, order_id, order_data, current_user)
+
+
+@router.delete(
+    "/{order_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete order",
+    description=(
+        "Delete an existing order by its ID. "
+        "This operation is irreversible and will remove the order permanently."
+    ),
+    responses={
+        **order_not_found_response,
+        **internal_server_error_response,
+    }
+)
+def delete_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    service: OrderService = Depends(get_order_service),
+    current_user: ClientModel = Depends(get_current_user),
+):
+    return service.delete_order(db, order_id, current_user)

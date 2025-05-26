@@ -8,7 +8,7 @@ from app.enums.order_status_enum import OrderStatusEnum
 from app.models.order_item_model import OrderItemModel
 from app.models.order_model import OrderModel
 from app.models.product_model import ProductModel
-from app.schemas.order_schema import OrderCreate
+from app.schemas.order_schema import OrderCreate, OrderUpdate
 from app.services.product_service import ProductService
 from app.utils.db_exceptions import handle_db_exceptions
 
@@ -38,9 +38,7 @@ class OrderService:
     ) -> List[OrderModel]:
         query = db.query(self.order_model)
 
-        if start_date and end_date:
-            query = query.filter(self.order_model.created_at.between(start_date, end_date))
-        elif start_date:
+        if start_date:
             query = query.filter(self.order_model.created_at >= start_date)
         elif end_date:
             query = query.filter(self.order_model.created_at <= end_date)
@@ -52,6 +50,7 @@ class OrderService:
 
         if order_id:
             query = query.filter(self.order_model.id == order_id)
+
         if status:
             query = query.filter(self.order_model.status == status)
 
@@ -106,10 +105,78 @@ class OrderService:
     
 
     def get_order_by_id(self, db: Session, order_id: int) -> OrderModel:
-        order = db.query(self.order_model).filter(self.order_model.id == order_id).first()
+        order = db.query(self.order_model)\
+                  .filter(self.order_model.id == order_id).first()
+        
         if not order:
             raise HTTPException(
                 status_code=404,
                 detail="Order not found."
             )
+        
         return order
+    
+    @handle_db_exceptions
+    def update_order(
+        self,
+        db: Session,
+        order_id: int,
+        order_data: OrderUpdate,
+        current_user
+    ) -> OrderModel:
+        order = self.get_order_by_id(db, order_id)
+
+        if current_user.role != "ADMIN":
+            if order.status == OrderStatusEnum.COMPLETED:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cannot modify a completed order."
+                )
+            
+            if order_data.status == OrderStatusEnum.CANCELED:
+                if order.status == OrderStatusEnum.CANCELED:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Order is already cancelled."
+                    )
+                self.product_service.restore_product_stock(db, order)
+                order.status = OrderStatusEnum.CANCELED
+            elif order_data.payment_method is not None:
+                order.payment_method = order_data.payment_method
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Only payment method or cancellation is allowed for users."
+                )
+        else:
+            if order_data.status == OrderStatusEnum.CANCELED and order.status != OrderStatusEnum.CANCELED:
+                self.product_service.restore_product_stock(db, order)
+            if order_data.status is not None:
+                order.status = order_data.status
+            if order_data.payment_method is not None:
+                order.payment_method = order_data.payment_method
+            if order_data.payment_status is not None:
+                order.payment_status = order_data.payment_status
+
+        db.commit()
+        db.refresh(order)
+        return order
+    
+    @handle_db_exceptions
+    def delete_order(self, db: Session, order_id: int, current_user) -> None:
+        order = self.get_order_by_id(db, order_id)
+
+        if current_user.role != "ADMIN" and order.client_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to delete this order."
+            )
+
+        if order.status != OrderStatusEnum.COMPLETED:
+            self.product_service.restore_product_stock(db, order)
+
+        for item in order.order_items:
+            db.delete(item)
+
+        db.delete(order)
+        db.commit()
