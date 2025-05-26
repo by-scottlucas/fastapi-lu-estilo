@@ -95,6 +95,12 @@ class ProductService:
         product_data: ProductCreate,
         image_paths: List[str]
     ) -> ProductModel:
+        if not image_paths:
+            raise HTTPException(
+                status_code=400,
+                detail="Product must have at least one image."
+            )
+
         self._check_bar_code_unique(db, product_data.bar_code)
 
         product_dict = product_data.model_dump()
