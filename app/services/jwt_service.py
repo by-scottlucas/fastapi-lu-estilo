@@ -3,12 +3,12 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 
-INVALID_TOKEN_SUB = "Invalid token: 'sub' claim missing"
-TOKEN_EXPIRED = "Token has expired"
-INVALID_TOKEN = "Invalid token"
-UNEXPECTED_ERROR = "Unexpected error decoding token"
-
 class JWTService:
+    INVALID_TOKEN_SUB = "Invalid token: 'sub' claim missing"
+    TOKEN_EXPIRED = "Token has expired"
+    INVALID_TOKEN = "Invalid token"
+    UNEXPECTED_ERROR = "Unexpected error decoding token"
+
     def __init__(
         self,
         secret_key: str = os.getenv("SECRET_KEY", "secret-key"),
@@ -66,15 +66,15 @@ class JWTService:
         except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=TOKEN_EXPIRED
+                detail=self.TOKEN_EXPIRED
             )
         except jwt.InvalidTokenError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=INVALID_TOKEN
+                detail=self.INVALID_TOKEN
             )
         except Exception as error:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"{UNEXPECTED_ERROR}: {error}"
+                detail=self.UNEXPECTED_ERROR
             )
