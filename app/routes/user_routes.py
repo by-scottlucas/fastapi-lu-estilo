@@ -24,14 +24,8 @@ def get_user_service() -> UserService:
     response_model=List[UserResponse],
     summary="List users",
     description=(
-        "Retrieve a list of users with optional filters:\n\n"
-        "- **skip**: number of records to skip for pagination (default 0).\n"
-        "- **limit**: maximum number of records to return (default 10, max 100).\n"
-        "- **name**: filter users by partial or full name (case-insensitive).\n"
-        "- **email**: filter users by partial or full email (case-insensitive).\n\n"
-        "**Example queries:**\n\n"
-        "- `/api/v1/users?name=John&limit=5`\n"
-        "- `/api/v1/users?email=example@example.com&skip=10&limit=20`"
+        "Returns a list of all registered users. Only administrators can access this endpoint. "
+        "Supports optional filters by name and email, as well as pagination using skip and limit."
     ),
     responses={
         **user_list_responses,
@@ -54,7 +48,10 @@ def list_users(
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a user",
-    description="Create a new user with the provided data.",
+    description=(
+        "Creates a new user with the provided information. Only administrators are allowed to perform this operation. "
+        "If the email or CPF already exists, a conflict error will be returned."
+    ),
     responses={
         **user_conflict_response,
         **internal_server_error_response
@@ -72,7 +69,9 @@ def create_user(
     "/{user_id}",
     response_model=UserResponse,
     summary="Get user by ID",
-    description="Retrieve details of a user by their unique ID.",
+    description=(
+        "Returns the details of a user by their ID. Users can only access their own data unless they are administrators."
+    ),
     responses={
         **user_not_found_response,
         **internal_server_error_response
@@ -84,13 +83,16 @@ def get_user_by_id(
     service: UserService = Depends(get_user_service),
     current_user: ClientModel = Depends(get_current_user),
 ):
-    return service.get_user_by_id(db, user_id)
+    return service.get_user_by_id(db, user_id, current_user)
 
 @router.put(
     "/{user_id}",
     response_model=UserResponse,
     summary="Update user",
-    description="Update an existing user by ID with the provided data.",
+    description=(
+        "Updates the data of a user by ID. Users can only update their own data unless they are administrators. "
+        "Only administrators can update user roles."
+    ),
     responses={
         **user_not_found_response,
         **user_conflict_response,
@@ -110,7 +112,10 @@ def update_user(
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete user",
-    description="Delete a user by their unique ID.",
+    description=(
+        "Deletes a user by ID. Only administrators can perform this operation. "
+        "Administrators are not allowed to delete their own accounts."
+    ),
     responses={
         **user_not_found_response,
         **internal_server_error_response
@@ -122,4 +127,4 @@ def delete_user(
     service: UserService = Depends(get_user_service),
     current_user: ClientModel = Depends(admin_required),
 ):
-    service.delete_user(db, user_id)
+    service.delete_user(db, user_id, current_user)
