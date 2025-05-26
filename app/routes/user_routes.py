@@ -6,7 +6,8 @@ from app.dependencies import admin_required, get_current_user
 from app.docs.user_responses import (
     user_not_found_response,
     user_conflict_response,
-    internal_server_error_response
+    internal_server_error_response,
+    user_list_responses
 )
 from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.user_service import UserService
@@ -29,10 +30,13 @@ def get_user_service() -> UserService:
         "- **name**: filter users by partial or full name (case-insensitive).\n"
         "- **email**: filter users by partial or full email (case-insensitive).\n\n"
         "**Example queries:**\n\n"
-        "- `/api/v1/users?name=Lucas&limit=5`\n"
+        "- `/api/v1/users?name=John&limit=5`\n"
         "- `/api/v1/users?email=example@example.com&skip=10&limit=20`"
     ),
-    responses={**internal_server_error_response}
+    responses={
+        **user_list_responses,
+        **internal_server_error_response
+    }
 )
 def list_users(
     skip: int = Query(0, ge=0),
