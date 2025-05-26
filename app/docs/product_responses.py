@@ -57,12 +57,13 @@ internal_server_error_response = {
 
 product_list_responses = {
     200: {
-        "description": "A list of products was successfully retrieved.",
+        "description": "Successful response with list of products.",
         "content": {
             "application/json": {
                 "examples": {
-                    "/products": {
-                        "summary": "All products (no filters)",
+                    "GET /products": {
+                        "summary": "GET /products",
+                        "description": "Returns all products without filters.",
                         "value": [
                             {
                                 "id": 1,
@@ -86,8 +87,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?stock=true": {
-                        "summary": "Products available in stock",
+                    "GET /products?stock=true": {
+                        "summary": "GET /products?stock=true",
+                        "description": "Returns products available in stock.",
                         "value": [
                             {
                                 "id": 1,
@@ -101,8 +103,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?stock=false": {
-                        "summary": "Products out of stock",
+                    "GET /products?stock=false": {
+                        "summary": "GET /products?stock=false",
+                        "description": "Returns products that are out of stock.",
                         "value": [
                             {
                                 "id": 2,
@@ -116,8 +119,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?category=Dresses": {
-                        "summary": "Filter by category: Dresses",
+                    "GET /products?category=Dresses": {
+                        "summary": "GET /products?category=Dresses",
+                        "description": "Returns products filtered by category 'Dresses'.",
                         "value": [
                             {
                                 "id": 1,
@@ -141,8 +145,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?min_price=150": {
-                        "summary": "Products priced at or above $150",
+                    "GET /products?min_price=150": {
+                        "summary": "GET /products?min_price=150",
+                        "description": "Returns products priced at or above $150.",
                         "value": [
                             {
                                 "id": 2,
@@ -166,8 +171,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?max_price=100": {
-                        "summary": "Products priced at or below $100",
+                    "GET /products?max_price=100": {
+                        "summary": "GET /products?max_price=100",
+                        "description": "Returns products priced at or below $100.",
                         "value": [
                             {
                                 "id": 4,
@@ -181,8 +187,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?stock=true&category=Blouses&max_price=100": {
-                        "summary": "Combined filter: in stock, category Blouses, price up to $100",
+                    "GET /products?stock=true&category=Blouses&max_price=100": {
+                        "summary": "GET /products?stock=true&category=Blouses&max_price=100",
+                        "description": "Returns products in stock, category 'Blouses', priced up to $100.",
                         "value": [
                             {
                                 "id": 4,
@@ -196,8 +203,9 @@ product_list_responses = {
                             }
                         ]
                     },
-                    "/products?skip=0&limit=1": {
-                        "summary": "Pagination: first product in the list",
+                    "GET /products?skip=0&limit=1": {
+                        "summary": "GET /products?skip=0&limit=1",
+                        "description": "Returns the first product in the list (pagination).",
                         "value": [
                             {
                                 "id": 1,

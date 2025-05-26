@@ -21,12 +21,12 @@ class FileService:
         category: str,
         product_name: str
     ) -> List[str]:
-        product_folder = self._build_product_folder(category, product_name)
+        product_folder = self.build_product_folder(category, product_name)
         product_folder.mkdir(parents=True, exist_ok=True)
 
         return [self._save_file(image, product_folder) for image in images]
 
-    def _build_product_folder(self, category: str, product_name: str) -> Path:
+    def build_product_folder(self, category: str, product_name: str) -> Path:
         safe_category = category.lower().replace(" ", "_")
         safe_name = product_name.lower().replace(" ", "_")
         return self.upload_dir / safe_category / safe_name

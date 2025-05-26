@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import Optional
 from passlib.context import CryptContext
-from app.enums.role_enum import RoleEnum
 from app.models.client_model import ClientModel
 from app.schemas.user_schema import UserBase, UserCreate, UserUpdate
 from app.utils.db_exceptions import handle_db_exceptions

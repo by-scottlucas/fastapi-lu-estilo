@@ -31,17 +31,9 @@ def get_file_service() -> FileService:
     response_model=List[ProductResponse],
     summary="List products",
     description=(
-        "Retrieve a list of products with optional filters:\n\n"
-        "- **skip**: number of records to skip (for pagination).\n"
-        "- **limit**: maximum number of records to return (default 10, max 100).\n"
-        "- **stock**: filter by stock availability. Use `true` to get only products in stock, "
-        "`false` for products out of stock, or omit to ignore this filter.\n"
-        "- **category**: filter products by exact category name (case-sensitive).\n"
-        "- **min_price**: filter products with sale price greater than or equal to this value.\n"
-        "- **max_price**: filter products with sale price less than or equal to this value.\n\n"
-        "**Example queries:**\n\n"
-        "- `/api/v1/products?stock=true&category=Electronics&min_price=500&max_price=1000`\n\n"
-        "- `/api/v1/products?skip=20&limit=10`"
+        "Returns a list of all registered products. Accessible by any authenticated user. "
+        "Supports optional filters by stock availability, category, minimum price, and maximum price, "
+        "as well as pagination using skip and limit."
     ),
     responses={
         **product_list_responses,
@@ -49,12 +41,32 @@ def get_file_service() -> FileService:
     }
 )
 def list_products(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, le=100),
-    stock: Optional[bool] = None,
-    category: Optional[str] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
+    skip: int = Query(
+        0,
+        ge=0,
+        description="Number of records to skip for pagination. Must be greater than or equal to 0."
+    ),
+    limit: int = Query(
+        10,
+        le=100,
+        description="Maximum number of records to return. Must be between 1 and 100."
+    ),
+    stock: Optional[bool] = Query(
+        None,
+        description="Filter products by stock availability. Use `true` for in stock, `false` for out of stock, or omit to ignore this filter."
+    ),
+    category: Optional[str] = Query(
+        None,
+        description="Filter products by exact category name (case-sensitive)."
+    ),
+    min_price: Optional[float] = Query(
+        None,
+        description="Filter products with sale price greater than or equal to this value."
+    ),
+    max_price: Optional[float] = Query(
+        None,
+        description="Filter products with sale price less than or equal to this value."
+    ),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_product_service),
     current_user: ClientModel = Depends(get_current_user),
@@ -74,7 +86,11 @@ def list_products(
     response_model=ProductResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create product with images",
-    description="Create a new product with the given details and upload multiple images.",
+    description=(
+        "Create a new product with the specified details and upload multiple images. "
+        "Only admin users can perform this operation. "
+        "Returns the created product data."
+    ),
     responses={
         **product_conflict_response,
         **internal_server_error_response
@@ -110,7 +126,7 @@ def create_product(
     "/{product_id}",
     response_model=ProductResponse,
     summary="Get product by ID",
-    description="Retrieve a product by its unique identifier.",
+    description="Retrieve detailed information about a product by its unique ID.",
     responses={
         **product_not_found_response,
         **internal_server_error_response
@@ -128,7 +144,11 @@ def get_product_by_id(
     "/{product_id}",
     response_model=ProductResponse,
     summary="Update product",
-    description="Update an existing product's details and images by its ID.",
+    description=(
+        "Update the details and images of an existing product by its ID. "
+        "Only admin users can perform this operation. "
+        "Returns the updated product data."
+    ),
     responses={
         **product_not_found_response,
         **product_conflict_response,
@@ -174,7 +194,7 @@ def update_product(
     "/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete product",
-    description="Delete a product by its ID.",
+    description="Delete a product by its ID. Only admin users can perform this operation.",
     responses={
         **product_not_found_response,
         **internal_server_error_response
