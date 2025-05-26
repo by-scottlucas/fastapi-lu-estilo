@@ -24,7 +24,11 @@ def get_auth_service() -> AuthService:
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    description="Creates a new user account with the provided information and returns the user data.",
+    description=(
+        "Creates a new user account with the provided data. "
+        "Returns the created user information. "
+        "If the email or CPF already exists, a conflict error is returned."
+    ),
     responses={
         **conflict_response,
         **internal_server_error_response,
@@ -50,7 +54,10 @@ def register(
     "/login",
     response_model=TokenSchema,
     summary="Authenticate user",
-    description="Authenticates the user using email and password, returning the access token.",
+    description=(
+        "Validates user credentials (email and password). "
+        "Returns an access token on successful authentication."
+    ),
     responses={
         **unauthorized_responses,
         **internal_server_error_response,
@@ -76,7 +83,10 @@ def login(
     "/refresh",
     response_model=TokenSchema,
     summary="Refresh access token",
-    description="Generates a new access token using a valid refresh token.",
+    description=(
+        "Generates a new access token based on a valid refresh token. "
+        "Returns the new access token to maintain an authenticated session."
+    ),
     responses={
         **unauthorized_responses,
         **internal_server_error_response,

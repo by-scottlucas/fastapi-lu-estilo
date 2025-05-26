@@ -7,12 +7,12 @@ from app.services.jwt_service import JWTService
 from app.services.user_service import UserService
 import jwt
 
-INVALID_CREDENTIALS = "Invalid email or password"
-INVALID_REFRESH_TOKEN = "Invalid refresh token"
-REFRESH_TOKEN_EXPIRED = "Refresh token expired"
-UNAUTHORIZED = status.HTTP_401_UNAUTHORIZED
-
 class AuthService:
+    INVALID_CREDENTIALS = "Invalid email or password"
+    INVALID_REFRESH_TOKEN = "Invalid refresh token"
+    REFRESH_TOKEN_EXPIRED = "Refresh token expired"
+    UNAUTHORIZED = status.HTTP_401_UNAUTHORIZED
+
     def __init__(self, user_service: UserService, jwt_service: JWTService):
         self.user_service = user_service
         self.jwt_service = jwt_service
@@ -24,8 +24,8 @@ class AuthService:
         user = self.user_service.get_user_by_email(db, email)
         if not user or not self.user_service.verify_password(password, user.password):
             raise HTTPException(
-                status_code=UNAUTHORIZED,
-                detail=INVALID_CREDENTIALS
+                status_code=self.UNAUTHORIZED,
+                detail=self.INVALID_CREDENTIALS
             )
 
         token_data = {"sub": user.email}
@@ -39,17 +39,17 @@ class AuthService:
             email = payload.get("sub")
             if not email:
                 raise HTTPException(
-                    status_code=UNAUTHORIZED,
-                    detail=INVALID_REFRESH_TOKEN
+                    status_code=self.UNAUTHORIZED,
+                    detail=self.INVALID_REFRESH_TOKEN
                 )
             return self.jwt_service.create_access_token({"sub": email})
         except jwt.ExpiredSignatureError:
             raise HTTPException(
-                status_code=UNAUTHORIZED,
-                detail=REFRESH_TOKEN_EXPIRED
+                status_code=self.UNAUTHORIZED,
+                detail=self.REFRESH_TOKEN_EXPIRED
             )
         except jwt.InvalidTokenError:
             raise HTTPException(
-                status_code=UNAUTHORIZED,
-                detail=INVALID_REFRESH_TOKEN
+                status_code=self.UNAUTHORIZED,
+                detail=self.INVALID_REFRESH_TOKEN
             )
