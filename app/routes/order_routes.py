@@ -19,12 +19,14 @@ from app.docs.order_responses import (
     order_list_responses,
     internal_server_error_response,
 )
+from app.services.user_service import UserService
 
 router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
 
 def get_order_service() -> OrderService:
+    user_service = UserService(ClientModel)
     product_service = ProductService(ProductModel, None)
-    return OrderService(OrderModel, OrderItemModel, product_service)
+    return OrderService(OrderModel, OrderItemModel, product_service, user_service)
 
 @router.get(
     "/",
@@ -95,7 +97,7 @@ def create_order(
     service: OrderService = Depends(get_order_service),
     current_user: ClientModel = Depends(get_current_user),
 ):
-    return service.create_order(db, order)
+    return service.create_order(db, order, current_user)
 
 
 @router.get(
